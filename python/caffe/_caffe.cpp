@@ -247,6 +247,9 @@ BOOST_PYTHON_MODULE(_caffe) {
         bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >())
     .def("save", &Net_Save);
 
+  boost::python::register_ptr_to_python<boost::shared_ptr<Blob<Dtype> > >();
+  boost::python::register_ptr_to_python<boost::shared_ptr<Net<Dtype> > >();
+
   bp::class_<Blob<Dtype>, shared_ptr<Blob<Dtype> >, boost::noncopyable>(
     "Blob", bp::no_init)
     .add_property("shape",
