@@ -25,6 +25,12 @@
 
 namespace caffe {
 
+std::string getEnvVar( std::string const & key )
+{
+    char * val = getenv( key.c_str() );
+    return val == NULL ? std::string("") : std::string(val);
+}
+
 template <typename Dtype>
 void MultiStageMeanfieldLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
@@ -65,15 +71,17 @@ void MultiStageMeanfieldLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bot
     caffe_set(channels_ * channels_, Dtype(0.), this->blobs_[1]->mutable_cpu_data());
 
     // Initialize the kernels weights. The two files spatial.par and bilateral.par should be available.
+    std::string spatial_filename = getEnvVar("SRCPATH") + "/spatial.par";
     FILE * pFile;
-    pFile = fopen("spatial.par", "r");
+    pFile = fopen(spatial_filename.c_str(), "r");
     CHECK(pFile) << "The file 'spatial.par' is not found. Please create it with initial spatial kernel weights.";
     for (int i = 0; i < channels_; i++) {
       fscanf(pFile, "%lf", &this->blobs_[0]->mutable_cpu_data()[i * channels_ + i]);
     }
     fclose(pFile);
 
-    pFile = fopen("bilateral.par", "r");
+    std::string bilateral_filename = getEnvVar("SRCPATH") + "/bilateral.par";
+    pFile = fopen(bilateral_filename.c_str(), "r");
     CHECK(pFile) << "The file 'bilateral.par' is not found. Please create it with initial bilateral kernel weights.";
     for (int i = 0; i < channels_; i++) {
       fscanf(pFile, "%lf", &this->blobs_[1]->mutable_cpu_data()[i * channels_ + i]);
